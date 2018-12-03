@@ -21,7 +21,7 @@
 .*/node_modules/metro/.*
 
 ; Project based
-<PROJECT_ROOT>/__tests__/.*
+
 
 [include]
 
