@@ -25,11 +25,11 @@ describe('debounce promise', () => {
   const operationFactory = (internalDuration: number, debounceDuration: number, options) => (
     debouncePromise(value => {
       // console.log('START OP', value)
-      return sleep(100).then(() => {
+      return sleep(internalDuration).then(() => {
         // console.log('FINISH OP', value)
         return internal(value)
       })
-    }, 100, options)
+    }, debounceDuration, options)
   )
 
   afterEach(() => {
