@@ -1,10 +1,9 @@
 /**
- * @Author: Rostislav Simonik <rostislav.simonik>
+ * @Author: Rostislav Simonik <rostislav.simonik@technologystudio.sk>
  * @Date:   2018-11-30T16:46:03+01:00
- * @Email:  rostislav.simonik@technologystudio.sk
  * @Copyright: Technology Studio
- * @flow
- */
+ **/
+/* eslint-disable @typescript-eslint/promise-function-async */
 
 import type {
   DebouncePromiseOptions,
@@ -12,20 +11,20 @@ import type {
   DebounceDuration,
 } from '../Model/Types'
 
-// TODO: is extracted from internal library, replace later by @txo/flow
-const is = <TYPE> (value: ?TYPE): TYPE => {
-  if (value) {
+const is = <TYPE> (value: TYPE | null): TYPE => {
+  if (value != null) {
     return value
   }
-  throw Error('undefined value, should be present')
+  throw Error('undefined or null value, should be present')
 }
 
 const getDuration = (duration: DebounceDuration): number => (
   typeof duration === 'function' ? duration() : duration
 )
 
-const createDeferredPromise = <DEFERED_PROMISE>(): DeferredPromise<DEFERED_PROMISE> => {
-  const deferred = {}
+const createDeferredPromise = <PROMISE_RESULT>(): DeferredPromise<PROMISE_RESULT> => {
+  // @ts-expect-error it's initialed right after instantiation
+  const deferred: DeferredPromise<PROMISE_RESULT> = {}
   deferred.promise = new Promise((resolve, reject) => {
     deferred.resolve = resolve
     deferred.reject = reject
@@ -33,18 +32,19 @@ const createDeferredPromise = <DEFERED_PROMISE>(): DeferredPromise<DEFERED_PROMI
   return deferred
 }
 
-export const debouncePromise = <PROMISE_RESULT>(
-  fn: (...args: any) => Promise<PROMISE_RESULT>,
+export const debouncePromise = <PROMISE_RESULT, ARGS>(
+  fn: (...args: ARGS[]) => Promise<PROMISE_RESULT>,
   duration: DebounceDuration,
   options?: DebouncePromiseOptions,
-) => {
-  let lastCallTimestamp: ?number
-  let deferredPromise: ?DeferredPromise<PROMISE_RESULT>
-  let pendingPromise: ?Promise<PROMISE_RESULT>
-  let timeoutId: ?TimeoutID
-  let pendingArgs
+): (...args: ARGS[]) => Promise<PROMISE_RESULT> => {
+  let lastCallTimestamp: number | null
+  let deferredPromise: DeferredPromise<PROMISE_RESULT> | null
+  let pendingPromise: Promise<PROMISE_RESULT> | null
+  let timeoutId: NodeJS.Timeout | null
+  let pendingArgs: ARGS[] | null
 
-  return function debounced (...args: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return function debounced (this: any, ...args: ARGS[]): Promise<PROMISE_RESULT> {
     const currentDuration = getDuration(duration)
     const currentCallTimestamp = new Date().getTime()
 
@@ -67,7 +67,7 @@ export const debouncePromise = <PROMISE_RESULT>(
     pendingArgs = args
 
     if (deferredPromise) {
-      if (options && options.throwBouncedPromiseError) {
+      if (options?.throwBouncedPromiseError) {
         deferredPromise.reject(new Error('bounced-call'))
         deferredPromise = createDeferredPromise()
       }
@@ -76,28 +76,31 @@ export const debouncePromise = <PROMISE_RESULT>(
     }
     if (!pendingPromise && !timeoutId) {
       timeoutId = setTimeout(
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         flushDeferredPromise.bind(this),
-        Math.min(currentDuration, lastCallTimestamp ? currentCallTimestamp - lastCallTimestamp : currentDuration)
+        Math.min(currentDuration, lastCallTimestamp ? currentCallTimestamp - lastCallTimestamp : currentDuration),
       )
     }
 
     return deferredPromise.promise
 
-    function finalizePromiseCall (promise: Promise<PROMISE_RESULT>) {
+    function finalizePromiseCall (promise: Promise<PROMISE_RESULT>): Promise<PROMISE_RESULT> {
       lastCallTimestamp = new Date().getTime()
       pendingPromise = promise.finally(() => {
-        // console.log('FINALY')
         pendingPromise = null
+      }).then(data => {
         if (pendingArgs) {
           const thisPendingArgs = pendingArgs
           pendingArgs = null
           return debounced(...thisPendingArgs)
         }
+        return Promise.resolve(data)
       })
       return pendingPromise
     }
 
-    function flushDeferredPromise () {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function flushDeferredPromise (this: any): Promise<PROMISE_RESULT> {
       // console.log('FLUSH', { timeoutId, deferredPromise, pendingPromise, pendingArgs })
       if (timeoutId) {
         clearTimeout(timeoutId)
@@ -108,9 +111,17 @@ export const debouncePromise = <PROMISE_RESULT>(
       pendingArgs = null
       deferredPromise = null
 
-      return finalizePromiseCall(
-        fn.call(this, ...thisPendingArgs).then(thisDeferredPromise.resolve, thisDeferredPromise.reject)
+      const promise = fn.call(this, ...thisPendingArgs).then(
+        (value) => {
+          thisDeferredPromise.resolve(value)
+          return value
+        },
+        (reason) => {
+          thisDeferredPromise.reject(reason)
+          return reason
+        },
       )
+      return finalizePromiseCall(promise)
     }
   }
 }

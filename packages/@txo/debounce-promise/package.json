@@ -2,8 +2,8 @@
   "name": "@txo/debounce-promise",
   "version": "1.0.0",
   "description": "Technology Studio - Debounce promise",
-  "main": "index.js",
-  "typings": "index.d.ts",
+  "main": "lib/index.js",
+  "typings": "src/index.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/technology-studio/debounce-promise.git"
@@ -16,6 +16,12 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "build": "yarn build:clean && yarn build:lib",
+    "build:clean": "yarn rimraf lib",
+    "build:lib": "yarn tsc",
+    "build:watch": "concurrently \"yarn build:watch:lib\"",
+    "build:watch:lib": "yarn tsc --watch",
+    "prepare": "yarn build"
   },
   "dependencies": {
   },
