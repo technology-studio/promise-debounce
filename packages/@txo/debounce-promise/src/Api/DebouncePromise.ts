@@ -23,8 +23,7 @@ const getDuration = (duration: DebounceDuration): number => (
 )
 
 const createDeferredPromise = <PROMISE_RESULT>(): DeferredPromise<PROMISE_RESULT> => {
-  // @ts-expect-error it's initialed right after instantiation
-  const deferred: DeferredPromise<PROMISE_RESULT> = {}
+  const deferred: DeferredPromise<PROMISE_RESULT> = {} as DeferredPromise<PROMISE_RESULT>
   deferred.promise = new Promise((resolve, reject) => {
     deferred.resolve = resolve
     deferred.reject = reject
