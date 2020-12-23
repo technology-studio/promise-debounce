@@ -23,6 +23,7 @@ const getDuration = (duration: DebounceDuration): number => (
 )
 
 const createDeferredPromise = <PROMISE_RESULT>(): DeferredPromise<PROMISE_RESULT> => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const deferred: DeferredPromise<PROMISE_RESULT> = {} as DeferredPromise<PROMISE_RESULT>
   deferred.promise = new Promise((resolve, reject) => {
     deferred.resolve = resolve
