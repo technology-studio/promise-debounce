@@ -1,6 +1,6 @@
 {
   "name": "@txo/debounce-promise",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Technology Studio - Debounce promise",
   "main": "lib/index.js",
   "typings": "src/index.ts",
