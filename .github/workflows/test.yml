@@ -1,0 +1,13 @@
+name: 'Test'
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  test:
+    name: '/'
+    uses: technology-studio/github-workflows/.github/workflows/_test.yml@main

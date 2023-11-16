@@ -7,18 +7,16 @@
 import { debouncePromise } from '@txo/debounce-promise'
 
 const TIMEOUT = 50
-const asyncFuncFactory = (timeout: number) => async (value: number): Promise<number> => {
-  return new Promise<number>((resolve, reject) => {
-    setTimeout(() => {
-      expect(value).toBe(value)
-      resolve(value)
-    }, timeout)
-  })
-}
+const asyncFuncFactory = (timeout: number) => async (value: number): Promise<number> => await new Promise<number>((resolve, reject) => {
+  setTimeout(() => {
+    expect(value).toBe(value)
+    resolve(value)
+  }, timeout)
+})
 test('shoud pass', async () => {
   const asyncFunc = debouncePromise(asyncFuncFactory(TIMEOUT), TIMEOUT, { immediate: false })
   expect.assertions(4)
-  return Promise.all([
+  await Promise.all([
     asyncFunc(1),
     asyncFunc(2),
     asyncFunc(3),
@@ -32,7 +30,7 @@ test('shoud pass', async () => {
 test('shoud pass 2', async () => {
   const asyncFunc = debouncePromise(asyncFuncFactory(TIMEOUT), TIMEOUT, { immediate: true })
   expect.assertions(5)
-  return Promise.all([
+  await Promise.all([
     asyncFunc(1),
     asyncFunc(2),
     asyncFunc(3),

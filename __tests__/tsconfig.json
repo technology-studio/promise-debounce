@@ -1,0 +1,19 @@
+{
+  "extends": "../tsconfig-base.json",
+  "compilerOptions": {
+    "rootDir": "../",
+    "baseUrl": "../",
+    "paths": {
+      "Config/*": ["./__tests__/Config/*"],
+      "Data/*": ["./__tests__/Data/*"],
+      "Utils/*": ["./__tests__/Utils/*"],
+      "src": ["./src"],
+      "src/*": ["./src/*"],
+      "@txo/debounce-promise": ["./src"],
+      "@txo/debounce-promise/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "./**/*.ts"
+  ]
+}
