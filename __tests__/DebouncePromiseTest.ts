@@ -7,7 +7,8 @@
 import { debouncePromise } from '@txo/debounce-promise'
 
 const TIMEOUT = 50
-const asyncFuncFactory = (timeout: number) => async (value: number): Promise<number> => await new Promise<number>((resolve, reject) => {
+// eslint-disable-next-line @typescript-eslint/return-await
+const asyncFuncFactory = (timeout: number) => async (value: number): Promise<number> => new Promise<number>((resolve, reject) => {
   setTimeout(() => {
     expect(value).toBe(value)
     resolve(value)
