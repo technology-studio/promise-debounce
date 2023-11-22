@@ -1,0 +1,11 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: '/'
+    uses: technology-studio/github-workflows/.github/workflows/_release.yml@main
+    secrets: inherit
